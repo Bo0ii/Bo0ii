@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=185&color=0:0b1020,55:2ec4b6,100:ff9f1c&text=Hi%20I’m%20Amr%20(Bo0ii)%20👋&fontAlignY=35&fontSize=44&fontColor=ffffff&animation=twinkling" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=185&color=0:0b1020,55:2ec4b6,100:ff9f1c&text=Hi%20I’m%20Amr%20&fontAlignY=35&fontSize=44&fontColor=ffffff&animation=twinkling" />
 </p>
 
 <p align="center">
