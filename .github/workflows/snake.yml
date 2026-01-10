@@ -12,17 +12,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Generate snake
+      - name: Generate snake (light + dark)
         uses: Platane/snk@v3
         with:
           github_user_name: ${{ github.repository_owner }}
           outputs: |
-            dist/github-contribution-grid-snake.svg
+            dist/github-contribution-grid-snake.svg?color_snake=#2ec4b6&color_dots=#ebedf0,#c6d1de,#9bb2c9,#6e8fb0,#2b6cb0
+            dist/github-contribution-grid-snake-dark.svg?color_snake=#ff3d81&color_dots=#0b1020,#101a2b,#16243b,#1f3556,#2ec4b6
 
       - name: Publish to output branch
         uses: crazy-max/ghaction-github-pages@v4
         with:
           target_branch: output
           build_dir: dist
+          commit_message: "chore: update contribution snake"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
