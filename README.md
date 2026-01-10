@@ -3,22 +3,22 @@
 <!-- =============================== -->
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=28&pause=900&center=true&vCenter=true&width=980&lines=Amr+(Bo0ii)+%7C+Computer+Engineer+%26+Full-Stack+Developer;Next.js+%7C+React+%7C+Vue+%7C+Modern+Product+Systems;ERP+Systems+%7C+Dashboards+%7C+Mobile+Apps;Clean+UI+%2B+Fast+Systems+%2B+Great+UX" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=28&pause=900&center=true&vCenter=true&width=980&lines=Amr+%7C+Computer+Engineer+%26+Full-Stack+Developer;Next.js+%7C+React+%7C+Vue+%7C+Modern+Product+Systems;ERP+Systems+%7C+Dashboards+%7C+Mobile+Apps;Clean+UI+%2B+Fast+Systems+%2B+Great+UX" alt="Typing SVG" />
 </p>
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=180&color=0:0ea5e9,60:7c3aed,100:22c55e&text=Hi%20I’m%20Amr%20👋&fontAlignY=35&fontSize=44&fontColor=ffffff&animation=twinkling" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=185&color=0:0b1020,55:2ec4b6,100:ff9f1c&text=Hi%20I’m%20Amr%20(Bo0ii)%20👋&fontAlignY=35&fontSize=44&fontColor=ffffff&animation=twinkling" />
 </p>
 
 <p align="center">
   <a href="https://github.com/Bo0ii">
-    <img src="https://img.shields.io/badge/GitHub-Bo0ii-111827?style=for-the-badge&logo=github&logoColor=white" />
+    <img src="https://img.shields.io/badge/GitHub-Bo0ii-0b1020?style=for-the-badge&logo=github&logoColor=white" />
   </a>
   <a href="https://www.linkedin.com/in/amr-ahmed-a78aa2249/">
-    <img src="https://img.shields.io/badge/LinkedIn-Amr%20Ahmed-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" />
+    <img src="https://img.shields.io/badge/LinkedIn-Amr%20Ahmed-2ec4b6?style=for-the-badge&logo=linkedin&logoColor=0b1020" />
   </a>
   <a href="mailto:amoroafg7881@hotmail.com">
-    <img src="https://img.shields.io/badge/Email-amoroafg7881%40hotmail.com-22c55e?style=for-the-badge&logo=gmail&logoColor=white" />
+    <img src="https://img.shields.io/badge/Email-amoroafg7881%40hotmail.com-ff9f1c?style=for-the-badge&logo=gmail&logoColor=0b1020" />
   </a>
 </p>
 
@@ -30,6 +30,7 @@ I build **websites**, **ERP systems**, and **mobile applications** — backed by
 
 - 🧠 Focus: **scalable systems, clean UI, performance, strong UX**
 - 🏗️ I enjoy building: **dashboards, automations, templates, business workflows**
+- ⚡ I like “native-feel” experiences: smooth UI, fast response, clean structure
 
 <br/>
 
@@ -50,10 +51,10 @@ I build **websites**, **ERP systems**, and **mobile applications** — backed by
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/Architecture-111827?style=for-the-badge&logo=buffer&logoColor=white" />
-  <img src="https://img.shields.io/badge/Performance-111827?style=for-the-badge&logo=googlechrome&logoColor=white" />
-  <img src="https://img.shields.io/badge/UI%2FUX%20Polish-111827?style=for-the-badge&logo=radix-ui&logoColor=white" />
-  <img src="https://img.shields.io/badge/Animations-7c3aed?style=for-the-badge&logo=framer&logoColor=white" />
+  <img src="https://img.shields.io/badge/Architecture-0b1020?style=for-the-badge&logo=buffer&logoColor=white" />
+  <img src="https://img.shields.io/badge/Performance-0b1020?style=for-the-badge&logo=googlechrome&logoColor=white" />
+  <img src="https://img.shields.io/badge/UI%2FUX%20Polish-0b1020?style=for-the-badge&logo=radix-ui&logoColor=white" />
+  <img src="https://img.shields.io/badge/Animations-0b1020?style=for-the-badge&logo=framer&logoColor=white" />
 </p>
 
 <br/>
@@ -65,9 +66,13 @@ I build **websites**, **ERP systems**, and **mobile applications** — backed by
 
 <br/>
 
-## 🐍 Contribution Snake
+## 🐍 Contribution Snake (Dark Mode)
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/github-contribution-grid-snake.svg" alt="snake" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/github-contribution-grid-snake-dark.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/github-contribution-grid-snake.svg" />
+    <img alt="github contribution snake" src="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/github-contribution-grid-snake-dark.svg" />
+  </picture>
 </p>
 
 <br/>
@@ -75,13 +80,13 @@ I build **websites**, **ERP systems**, and **mobile applications** — backed by
 ## 🤝 Let’s Connect
 <p align="center">
   <a href="https://www.linkedin.com/in/amr-ahmed-a78aa2249/">
-    <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" />
+    <img src="https://img.shields.io/badge/LinkedIn-2ec4b6?style=for-the-badge&logo=linkedin&logoColor=0b1020" />
   </a>
   <a href="mailto:amoroafg7881@hotmail.com">
-    <img src="https://img.shields.io/badge/Email-22c55e?style=for-the-badge&logo=gmail&logoColor=white" />
+    <img src="https://img.shields.io/badge/Email-ff9f1c?style=for-the-badge&logo=gmail&logoColor=0b1020" />
   </a>
 </p>
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=120&color=0:22c55e,60:7c3aed,100:0ea5e9&section=footer" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=125&color=0:0b1020,55:ff3d81,100:ff9f1c&section=footer" />
 </p>
