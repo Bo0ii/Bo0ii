@@ -66,7 +66,7 @@ I build **websites**, **ERP systems**, and **mobile applications** — backed by
 
 <br/>
 
-## 🐍 Contribution Snake (Dark Mode)
+## 🐍 Contribution Snake
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/github-contribution-grid-snake-dark.svg" />
