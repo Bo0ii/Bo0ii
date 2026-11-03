@@ -124,7 +124,16 @@ function readable(hex, bg, min = 3) {
   return toHex(c);
 }
 
-function frame(w, h, t, body, { inset = 6, radius = 12 } = {}) {
+// Filled card with a hairline edge; full panels also get a short accent mark on the top edge.
+function card(w, h, t, inset, radius, mark) {
+  const x = inset + 0.5;
+  const y = inset + 0.5;
+  let out = `<rect x="${x}" y="${y}" width="${w - inset * 2 - 1}" height="${h - inset * 2 - 1}" rx="${radius}" fill="${t.surface}" stroke="${t.line}"/>`;
+  if (mark) out += `<path d="M${x + radius + 10} ${y}h28" stroke="${t.accent}" stroke-width="2" stroke-linecap="round"/>`;
+  return out;
+}
+
+function frame(w, h, t, body, { inset = 6, radius = 12, mark = true } = {}) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none">
 <style>
 .s{font-family:${SANS}}
@@ -140,7 +149,7 @@ function frame(w, h, t, body, { inset = 6, radius = 12 } = {}) {
 @keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 @media (prefers-reduced-motion:reduce){.pulse,.spark,.flash{animation:none;opacity:0}.grow{animation:none}}
 </style>
-<rect x="${inset}" y="${inset}" width="${w - inset * 2}" height="${h - inset * 2}" rx="${radius}" fill="${t.surface}"/>
+${card(w, h, t, inset, radius, mark)}
 ${body}
 </svg>
 `;
@@ -349,7 +358,7 @@ function badge(t, link) {
   let body = glyph(link.icon, 16, 14, 16, t[link.tone], 2);
   body += text(42, 27, 's', `font-size="14" font-weight="500" fill="${t.strong}"`, link.label);
   body += glyph('arrow', w - 26, 16, 12, t.muted, 2.2);
-  return frame(w, h, t, body, { inset: 0, radius: 8 });
+  return frame(w, h, t, body, { inset: 0.5, radius: 8, mark: false });
 }
 
 // ---------- main ----------
