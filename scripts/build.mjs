@@ -1,4 +1,6 @@
-// Draws the profile panels as SVG (dark + light) from live GitHub data.
+// Draws the profile panels as SVG from live GitHub data.
+// Desktop panels come as dark + light files, which GitHub swaps to match its theme.
+// Phone panels are one file each, laid out narrow and tall, and switch theme on their own.
 // Usage: GITHUB_TOKEN=... node scripts/build.mjs [outDir]
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -9,6 +11,7 @@ const OUT = process.argv[2] ?? 'dist';
 const PROFILE = {
   name: 'Amr Ahmed',
   role: 'Computer engineer · Full-stack developer · UAE',
+  roleShort: 'Computer engineer · Full-stack · UAE',
   tagline: 'Native desktop software, real-time systems and the business platforms behind them.',
   focus: [
     { icon: 'monitor', title: 'Desktop & native', text: 'Cross-platform desktop apps that feel native: Rust cores inside Electron and Tauri shells.' },
@@ -33,11 +36,13 @@ const THEMES = {
     text: '#424a53', strong: '#1f2328', accent: '#41715c', blue: '#456482', amber: '#82693f',
   },
 };
+// Theme-following palette for phone panels: every color is a CSS variable set per color scheme.
+const AUTO = { ...Object.fromEntries(Object.keys(THEMES.dark).map((k) => [k, `var(--${k})`])), auto: true };
 
 const SANS = `-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif`;
 const MONO = `ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace`;
-const W = 960;
-const PAD = 38;
+const DESK = { w: 880, pad: 38 };
+const PHONE = { w: 390, pad: 24 };
 
 // ---------- data ----------
 
@@ -80,7 +85,7 @@ function signalStats(days) {
   for (const d of days) weekdayTotals[new Date(`${d.date}T00:00:00Z`).getUTCDay()] += d.count;
   const busiest = weekdayTotals.indexOf(Math.max(...weekdayTotals));
   const peak = days.reduce((best, d) => (d.count > best.count ? d : best), days[0]);
-  return { total, active, longest, current, busiest, peak };
+  return { total, active, longest, current, busiest, peak, days: days.length };
 }
 
 // ---------- helpers ----------
@@ -95,6 +100,17 @@ const r1 = (n) => Math.round(n * 10) / 10;
 function stamp(iso) {
   const d = new Date(iso);
   return `${String(d.getUTCDate()).padStart(2, '0')} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+}
+
+function wrap(str, max) {
+  const lines = [];
+  let line = '';
+  for (const word of str.split(' ')) {
+    if (line && `${line} ${word}`.length > max) { lines.push(line); line = word; }
+    else line = line ? `${line} ${word}` : word;
+  }
+  if (line) lines.push(line);
+  return lines;
 }
 
 const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
@@ -124,6 +140,18 @@ function readable(hex, bg, min = 3) {
   return toHex(c);
 }
 
+// Presentation attributes cannot hold var(), so theme-following panels move those colors into style.
+function cssify(svg) {
+  return svg.replace(/<([a-zA-Z]+)((?:\s+[\w:-]+="[^"]*")*)\s*(\/?)>/g, (tag, name, attrs, close) => {
+    const moved = [];
+    let rest = attrs.replace(/\s(fill|stroke)="(var\(--[\w-]+\))"/g, (_, k, v) => { moved.push(`${k}:${v}`); return ''; });
+    if (!moved.length) return tag;
+    if (/\sstyle="/.test(rest)) rest = rest.replace(/\sstyle="([^"]*)"/, (_, s) => ` style="${moved.join(';')};${s}"`);
+    else rest += ` style="${moved.join(';')}"`;
+    return `<${name}${rest}${close}>`;
+  });
+}
+
 // Filled card with a hairline edge; full panels also get a short accent mark on the top edge.
 function card(w, h, t, inset, radius, mark) {
   const x = inset + 0.5;
@@ -133,10 +161,18 @@ function card(w, h, t, inset, radius, mark) {
   return out;
 }
 
-function frame(w, h, t, body, { inset = 6, radius = 12, mark = true } = {}) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none">
+function frame(w, h, t, body, { inset = 6, radius = 12, mark = true, vars = {} } = {}) {
+  let theme = '';
+  if (t.auto) {
+    const pick = (mode) => [
+      ...Object.entries(THEMES[mode]).map(([k, v]) => `--${k}:${v}`),
+      ...Object.entries(vars).map(([k, v]) => `--${k}:${v[mode]}`),
+    ].join(';');
+    theme = `:root{${pick('light')}}\n@media (prefers-color-scheme:dark){:root{${pick('dark')}}}\n`;
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none">
 <style>
-.s{font-family:${SANS}}
+${theme}.s{font-family:${SANS}}
 .lbl{font-family:${MONO};font-size:11px;font-weight:500;letter-spacing:.08em;fill:${t.muted}}
 .tick{font-family:${MONO};font-size:10px;letter-spacing:.06em;fill:${t.muted}}
 .pulse{transform-box:fill-box;transform-origin:center;animation:pulse 2.6s cubic-bezier(.2,.6,.3,1) infinite}
@@ -153,11 +189,12 @@ ${card(w, h, t, inset, radius, mark)}
 ${body}
 </svg>
 `;
+  return t.auto ? cssify(svg) : svg;
 }
 
 const text = (x, y, cls, attrs, content) => `<text x="${r1(x)}" y="${r1(y)}" class="${cls}" ${attrs}>${esc(content)}</text>`;
 const liveDot = (cx, cy, t) =>
-  `<circle cx="${cx}" cy="${cy}" r="3.5" fill="${t.accent}" class="pulse"/><circle cx="${cx}" cy="${cy}" r="3.5" fill="${t.accent}"/>`;
+  `<circle cx="${r1(cx)}" cy="${r1(cy)}" r="3.5" fill="${t.accent}" class="pulse"/><circle cx="${r1(cx)}" cy="${r1(cy)}" r="3.5" fill="${t.accent}"/>`;
 
 function smoothPath(points) {
   // Catmull-Rom spline through the points, as cubic beziers.
@@ -174,17 +211,26 @@ function smoothPath(points) {
   return d;
 }
 
-// ---------- panels ----------
+const GLYPHS = {
+  globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+  linkedin: '<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/>',
+  mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+  arrow: '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
+  monitor: '<rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
+  layout: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>',
+  database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+  pen: '<path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z"/><path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"/><path d="m2.3 2.3 7.286 7.286"/><circle cx="11" cy="11" r="2"/>',
+};
 
-function hero(t, days, stats, now) {
-  const h = 368;
-  const x0 = PAD;
-  const x1 = W - PAD;
-  const top = 178;
-  const base = 262;
+const glyph = (name, x, y, size, color, width) =>
+  `<g transform="translate(${r1(x)} ${r1(y)}) scale(${size / 24})" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round" fill="none">${GLYPHS[name]}</g>`;
+
+// ---------- building blocks ----------
+
+// The 365-day trace: raw days as faint ticks, a 7-day mean as the line, a spark running along it.
+function trace(t, days, stats, { x0, x1, top, base, monthEvery = 1 }) {
   const n = days.length;
   const xs = (i) => x0 + (i / (n - 1)) * (x1 - x0);
-
   const counts = days.map((d) => d.count);
   const mean = counts.map((_, i) => {
     const a = Math.max(0, i - 3);
@@ -198,130 +244,68 @@ function hero(t, days, stats, now) {
   const scale = Math.max(Math.max(...mean) * 1.25, p97, 1);
   const ys = (v) => base - Math.min(v / scale, 1) * (base - top);
 
-  let body = '';
-  body += text(PAD, 50, 'lbl', '', PROFILE.role.toUpperCase());
-  body += text(W - PAD - 16, 50, 'lbl', 'text-anchor="end"', `SYNCED ${stamp(now)}`);
-  body += liveDot(W - PAD - 4, 46, t);
-  body += text(PAD, 92, 's', `font-size="34" font-weight="600" letter-spacing="-0.02em" fill="${t.strong}"`, PROFILE.name);
-  body += text(PAD, 121, 's', `font-size="15" fill="${t.text}"`, PROFILE.tagline);
-
-  body += text(PAD, 160, 'lbl', '', 'SIGNAL · LAST 365 DAYS');
-  body += text(W - PAD, 160, 'lbl', 'text-anchor="end"', 'DAILY CONTRIBUTIONS · 7-DAY MEAN');
-
-  // Raw days as faint ticks behind the trace.
+  let out = '';
   let ticks = '';
   counts.forEach((c, i) => {
     if (c > 0) ticks += `M${r1(xs(i))} ${base}V${r1(ys(c))}`;
   });
-  body += `<path d="${ticks}" stroke="${t.faint}" stroke-width="1.3" opacity=".55"/>`;
+  out += `<path d="${ticks}" stroke="${t.faint}" stroke-width="1.3" opacity=".55"/>`;
 
+  let monthIndex = 0;
   days.forEach((d, i) => {
-    if (d.date.endsWith('-01')) {
-      const x = r1(xs(i));
-      body += `<line x1="${x}" y1="${base}" x2="${x}" y2="${base + 5}" stroke="${t.faint}"/>`;
-      body += text(x + 4, base + 20, 'tick', '', MONTHS[Number(d.date.slice(5, 7)) - 1]);
-    }
+    if (!d.date.endsWith('-01')) return;
+    const x = r1(xs(i));
+    out += `<line x1="${x}" y1="${base}" x2="${x}" y2="${base + 5}" stroke="${t.faint}"/>`;
+    if (monthIndex++ % monthEvery === 0) out += text(x + 4, base + 20, 'tick', '', MONTHS[Number(d.date.slice(5, 7)) - 1]);
   });
-  body += `<line x1="${x0}" y1="${base + 0.5}" x2="${x1}" y2="${base + 0.5}" stroke="${t.line}"/>`;
+  out += `<line x1="${x0}" y1="${base + 0.5}" x2="${x1}" y2="${base + 0.5}" stroke="${t.line}"/>`;
 
   const pts = mean.map((v, i) => [xs(i), ys(v)]);
   const line = smoothPath(pts);
-  body += `<path d="${line}L${x1} ${base}L${x0} ${base}Z" fill="${t.strong}" opacity=".05"/>`;
-  body += `<path d="${line}" stroke="${t.strong}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>`;
-  body += `<path d="${line}" pathLength="1000" class="spark" stroke="${t.accent}" stroke-width="2.6" stroke-linecap="round"/>`;
+  out += `<path d="${line}L${x1} ${base}L${x0} ${base}Z" fill="${t.strong}" opacity=".05"/>`;
+  out += `<path d="${line}" stroke="${t.strong}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>`;
+  out += `<path d="${line}" pathLength="1000" class="spark" stroke="${t.accent}" stroke-width="2.6" stroke-linecap="round"/>`;
 
   const pi = days.findIndex((d) => d.date === stats.peak.date);
   const px = xs(pi);
   const py = ys(stats.peak.count);
-  body += `<circle cx="${r1(px)}" cy="${r1(py)}" r="2.5" fill="${t.strong}"/>`;
-  const anchor = px > W - 160 ? 'end' : 'start';
-  body += text(anchor === 'end' ? px - 7 : px + 7, py + 3.5, 'tick', `text-anchor="${anchor}"`, `PEAK ${stats.peak.count} · ${stamp(stats.peak.date).slice(0, 6)}`);
+  out += `<circle cx="${r1(px)}" cy="${r1(py)}" r="2.5" fill="${t.strong}"/>`;
+  const anchor = px > x1 - 130 ? 'end' : 'start';
+  out += text(anchor === 'end' ? px - 7 : px + 7, py + 3.5, 'tick', `text-anchor="${anchor}"`, `PEAK ${stats.peak.count} · ${stamp(stats.peak.date).slice(0, 6)}`);
 
   const [ex, ey] = pts[pts.length - 1];
-  body += liveDot(r1(ex), r1(ey), t);
+  out += liveDot(ex, ey, t);
+  return out;
+}
 
-  const items = [
+function statItems(stats) {
+  return [
     ['Contributions', num(stats.total)],
-    ['Active days', `${stats.active} / ${n}`],
+    ['Active days', `${stats.active} / ${stats.days}`],
     ['Longest streak', `${stats.longest} days`],
     ['Current streak', `${stats.current} ${stats.current === 1 ? 'day' : 'days'}`],
     ['Busiest day', WEEKDAYS[stats.busiest]],
   ];
-  const colW = (W - PAD * 2) / items.length;
-  body += `<line x1="${PAD}" y1="298.5" x2="${W - PAD}" y2="298.5" stroke="${t.line}"/>`;
+}
+
+function statGrid(t, items, { x0, x1, cols, y, rowH, size }) {
+  const colW = (x1 - x0) / cols;
+  let out = '';
   items.forEach(([label, value], i) => {
-    const x = PAD + i * colW;
-    body += text(x, 324, 'lbl', '', label.toUpperCase());
-    body += text(x, 348, 's', `font-size="19" font-weight="600" letter-spacing="-0.01em" fill="${t.strong}"`, value);
+    const x = x0 + (i % cols) * colW;
+    const ry = y + Math.floor(i / cols) * rowH;
+    out += text(x, ry, 'lbl', '', label.toUpperCase());
+    out += text(x, ry + 24, 's', `font-size="${size}" font-weight="600" letter-spacing="-0.01em" fill="${t.strong}"`, value);
   });
-  return frame(W, h, t, body);
+  return out;
 }
 
-function toolkit(t, icons) {
-  const h = 128;
-  const size = 26;
-  const y = 66;
-  const pitch = (W - PAD * 2 - size) / (icons.length - 1);
-  // One full pass takes exactly one cycle, so the colored band loops like a snake with no pause.
-  const step = 0.2;
-  const cycle = r1(icons.length * step);
-  let body = text(PAD, 46, 'lbl', '', 'STACK');
-  icons.forEach((icon, i) => {
-    const x = PAD + i * pitch;
-    const color = readable(soften(icon.hex), t.surface);
-    body += `<g transform="translate(${r1(x)} ${y}) scale(${size / 24})"><title>${esc(icon.title)}</title>`;
-    body += `<path d="${icon.path}" fill="${t.muted}" opacity=".8"/>`;
-    body += `<path d="${icon.path}" fill="${color}" class="flash" style="animation-duration:${cycle}s;animation-delay:${(i * step - cycle).toFixed(2)}s"/></g>`;
-  });
-  return frame(W, h, t, body);
-}
-
-const GLYPHS = {
-  globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
-  linkedin: '<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/>',
-  mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
-  arrow: '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
-  monitor: '<rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
-  layout: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>',
-  database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
-  pen: '<path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z"/><path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"/><path d="m2.3 2.3 7.286 7.286"/><circle cx="11" cy="11" r="2"/>',
-};
-
-const glyph = (name, x, y, size, color, width) =>
-  `<g transform="translate(${x} ${y}) scale(${size / 24})" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round" fill="none">${GLYPHS[name]}</g>`;
-
-function wrap(str, max) {
-  const lines = [];
-  let line = '';
-  for (const word of str.split(' ')) {
-    if (line && `${line} ${word}`.length > max) { lines.push(line); line = word; }
-    else line = line ? `${line} ${word}` : word;
-  }
-  if (line) lines.push(line);
-  return lines;
-}
-
-function focus(t) {
-  const h = 226;
-  const colW = (W - PAD * 2) / PROFILE.focus.length;
-  let body = text(PAD, 46, 'lbl', '', 'WHAT I BUILD');
-  PROFILE.focus.forEach((f, i) => {
-    const x = PAD + i * colW;
-    body += glyph(f.icon, x, 66, 18, t.accent, 1.8);
-    body += text(x, 112, 's', `font-size="15" font-weight="600" fill="${t.strong}"`, f.title);
-    wrap(f.text, 30).slice(0, 4).forEach((l, j) => {
-      body += text(x, 136 + j * 19, 's', `font-size="13" fill="${t.text}"`, l);
-    });
-  });
-  return frame(W, h, t, body);
-}
-
-function bars(t, { x0, x1, base, height, items, highlight, label }) {
+function bars(t, { x0, x1, labelY, base, height, items, highlight, label }) {
   const n = items.length;
   const max = Math.max(...items.map((d) => d.value), 1);
   const bw = Math.min(34, ((x1 - x0) / n) * 0.62);
   const pitch = (x1 - x0 - bw) / (n - 1);
-  let out = text(x0, 46, 'lbl', '', label);
+  let out = text(x0, labelY, 'lbl', '', label);
   items.forEach((d, i) => {
     const x = x0 + i * pitch;
     const bh = Math.max((d.value / max) * height, d.value > 0 ? 2 : 0);
@@ -336,8 +320,7 @@ function bars(t, { x0, x1, base, height, items, highlight, label }) {
   return out;
 }
 
-function rhythm(t, days) {
-  const h = 212;
+function rhythmData(days) {
   const weekday = [0, 0, 0, 0, 0, 0, 0];
   const months = new Map();
   for (const d of days) {
@@ -347,9 +330,79 @@ function rhythm(t, days) {
   }
   const week = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((label, i) => ({ label, value: weekday[i] }));
   const month = [...months].slice(-12).map(([key, value]) => ({ label: MONTHS[Number(key.slice(5, 7)) - 1], value }));
-  let body = bars(t, { x0: PAD, x1: 440, base: 168, height: 86, items: week, highlight: -1, label: 'WEEKLY RHYTHM' });
-  body += bars(t, { x0: 500, x1: W - PAD, base: 168, height: 86, items: month, highlight: month.length - 1, label: 'MONTHLY VOLUME' });
-  return frame(W, h, t, body);
+  return { week, month };
+}
+
+// Logos in grey with a muted color band that loops across them like a snake.
+function logos(t, icons, { x0, x1, y, size, perRow, rowH }) {
+  const pitch = (x1 - x0 - size) / (perRow - 1);
+  const step = 0.2;
+  const cycle = r1(icons.length * step);
+  const vars = {};
+  let out = '';
+  icons.forEach((icon, i) => {
+    const x = x0 + (i % perRow) * pitch;
+    const iy = y + Math.floor(i / perRow) * rowH;
+    const tone = (mode) => readable(soften(icon.hex), THEMES[mode].surface);
+    let color;
+    if (t.auto) {
+      vars[`i${i}`] = { dark: tone('dark'), light: tone('light') };
+      color = `var(--i${i})`;
+    } else {
+      color = readable(soften(icon.hex), t.surface);
+    }
+    out += `<g transform="translate(${r1(x)} ${r1(iy)}) scale(${size / 24})"><title>${esc(icon.title)}</title>`;
+    out += `<path d="${icon.path}" fill="${t.muted}" opacity=".8"/>`;
+    out += `<path d="${icon.path}" fill="${color}" class="flash" style="animation-duration:${cycle}s;animation-delay:${(i * step - cycle).toFixed(2)}s"/></g>`;
+  });
+  return { out, vars };
+}
+
+// ---------- desktop panels ----------
+
+function heroDesk(t, days, stats, now) {
+  const { w, pad } = DESK;
+  let body = '';
+  body += text(pad, 50, 'lbl', '', PROFILE.role.toUpperCase());
+  body += text(w - pad - 16, 50, 'lbl', 'text-anchor="end"', `SYNCED ${stamp(now)}`);
+  body += liveDot(w - pad - 4, 46, t);
+  body += text(pad, 92, 's', `font-size="34" font-weight="600" letter-spacing="-0.02em" fill="${t.strong}"`, PROFILE.name);
+  body += text(pad, 121, 's', `font-size="15" fill="${t.text}"`, PROFILE.tagline);
+  body += text(pad, 160, 'lbl', '', 'SIGNAL · LAST 365 DAYS');
+  body += text(w - pad, 160, 'lbl', 'text-anchor="end"', 'DAILY CONTRIBUTIONS · 7-DAY MEAN');
+  body += trace(t, days, stats, { x0: pad, x1: w - pad, top: 178, base: 262 });
+  body += `<line x1="${pad}" y1="298.5" x2="${w - pad}" y2="298.5" stroke="${t.line}"/>`;
+  body += statGrid(t, statItems(stats), { x0: pad, x1: w - pad, cols: 5, y: 324, rowH: 0, size: 19 });
+  return frame(w, 368, t, body);
+}
+
+function focusDesk(t) {
+  const { w, pad } = DESK;
+  const colW = (w - pad * 2) / PROFILE.focus.length;
+  const wrapped = PROFILE.focus.map((f) => wrap(f.text, 28).slice(0, 5));
+  const lines = Math.max(...wrapped.map((l) => l.length));
+  let body = text(pad, 46, 'lbl', '', 'WHAT I BUILD');
+  PROFILE.focus.forEach((f, i) => {
+    const x = pad + i * colW;
+    body += glyph(f.icon, x, 66, 18, t.accent, 1.8);
+    body += text(x, 112, 's', `font-size="15" font-weight="600" fill="${t.strong}"`, f.title);
+    wrapped[i].forEach((l, j) => { body += text(x, 136 + j * 19, 's', `font-size="13" fill="${t.text}"`, l); });
+  });
+  return frame(w, 136 + (lines - 1) * 19 + 34, t, body);
+}
+
+function stackDesk(t, icons) {
+  const { w, pad } = DESK;
+  const { out, vars } = logos(t, icons, { x0: pad, x1: w - pad, y: 66, size: 26, perRow: icons.length, rowH: 0 });
+  return frame(w, 128, t, text(pad, 46, 'lbl', '', 'STACK') + out, { vars });
+}
+
+function rhythmDesk(t, days) {
+  const { w, pad } = DESK;
+  const { week, month } = rhythmData(days);
+  let body = bars(t, { x0: pad, x1: w / 2 - 24, labelY: 46, base: 168, height: 86, items: week, highlight: -1, label: 'WEEKLY RHYTHM' });
+  body += bars(t, { x0: w / 2 + 24, x1: w - pad, labelY: 46, base: 168, height: 86, items: month, highlight: month.length - 1, label: 'MONTHLY VOLUME' });
+  return frame(w, 212, t, body);
 }
 
 function badge(t, link) {
@@ -359,6 +412,54 @@ function badge(t, link) {
   body += text(42, 27, 's', `font-size="14" font-weight="500" fill="${t.strong}"`, link.label);
   body += glyph('arrow', w - 26, 16, 12, t.muted, 2.2);
   return frame(w, h, t, body, { inset: 0.5, radius: 8, mark: false });
+}
+
+// ---------- phone panels ----------
+
+function heroPhone(t, days, stats, now) {
+  const { w, pad } = PHONE;
+  const x1 = w - pad;
+  let body = '';
+  body += text(pad, 42, 'lbl', '', PROFILE.roleShort.toUpperCase());
+  body += text(pad, 80, 's', `font-size="30" font-weight="600" letter-spacing="-0.02em" fill="${t.strong}"`, PROFILE.name);
+  wrap(PROFILE.tagline, 44).forEach((l, i) => {
+    body += text(pad, 108 + i * 20, 's', `font-size="14" fill="${t.text}"`, l);
+  });
+  body += text(pad, 166, 'lbl', '', 'SIGNAL · 365 DAYS');
+  body += text(x1 - 14, 166, 'lbl', 'text-anchor="end"', `SYNCED ${stamp(now).slice(0, 6)}`);
+  body += liveDot(x1 - 4, 162, t);
+  body += trace(t, days, stats, { x0: pad, x1, top: 190, base: 262, monthEvery: 2 });
+  body += `<line x1="${pad}" y1="298.5" x2="${x1}" y2="298.5" stroke="${t.line}"/>`;
+  body += statGrid(t, statItems(stats), { x0: pad, x1, cols: 3, y: 324, rowH: 56, size: 18 });
+  return frame(w, 412, t, body);
+}
+
+function focusPhone(t) {
+  const { w, pad } = PHONE;
+  let body = text(pad, 42, 'lbl', '', 'WHAT I BUILD');
+  let y = 66;
+  for (const f of PROFILE.focus) {
+    body += glyph(f.icon, pad, y, 18, t.accent, 1.8);
+    body += text(pad + 30, y + 14, 's', `font-size="15" font-weight="600" fill="${t.strong}"`, f.title);
+    const lines = wrap(f.text, 42);
+    lines.forEach((l, j) => { body += text(pad + 30, y + 37 + j * 19, 's', `font-size="13" fill="${t.text}"`, l); });
+    y += 37 + (lines.length - 1) * 19 + 30;
+  }
+  return frame(w, y + 4, t, body);
+}
+
+function stackPhone(t, icons) {
+  const { w, pad } = PHONE;
+  const { out, vars } = logos(t, icons, { x0: pad, x1: w - pad, y: 60, size: 24, perRow: Math.ceil(icons.length / 2), rowH: 40 });
+  return frame(w, 142, t, text(pad, 42, 'lbl', '', 'STACK') + out, { vars });
+}
+
+function rhythmPhone(t, days) {
+  const { w, pad } = PHONE;
+  const { week, month } = rhythmData(days);
+  let body = bars(t, { x0: pad, x1: w - pad, labelY: 42, base: 136, height: 64, items: week, highlight: -1, label: 'WEEKLY RHYTHM' });
+  body += bars(t, { x0: pad, x1: w - pad, labelY: 196, base: 290, height: 64, items: month, highlight: month.length - 1, label: 'MONTHLY VOLUME' });
+  return frame(w, 332, t, body);
 }
 
 // ---------- main ----------
@@ -372,11 +473,16 @@ await mkdir(OUT, { recursive: true });
 
 const files = {};
 for (const [mode, t] of Object.entries(THEMES)) {
-  files[`hero-${mode}.svg`] = hero(t, days, stats, now);
-  files[`focus-${mode}.svg`] = focus(t);
-  files[`stack-${mode}.svg`] = toolkit(t, icons);
-  files[`rhythm-${mode}.svg`] = rhythm(t, days);
+  files[`hero-${mode}.svg`] = heroDesk(t, days, stats, now);
+  files[`focus-${mode}.svg`] = focusDesk(t);
+  files[`stack-${mode}.svg`] = stackDesk(t, icons);
+  files[`rhythm-${mode}.svg`] = rhythmDesk(t, days);
   for (const link of PROFILE.links) files[`link-${link.id}-${mode}.svg`] = badge(t, link);
 }
+files['hero-phone.svg'] = heroPhone(AUTO, days, stats, now);
+files['focus-phone.svg'] = focusPhone(AUTO);
+files['stack-phone.svg'] = stackPhone(AUTO, icons);
+files['rhythm-phone.svg'] = rhythmPhone(AUTO, days);
+
 await Promise.all(Object.entries(files).map(([name, svg]) => writeFile(join(OUT, name), svg)));
 console.log(`Drew ${Object.keys(files).length} panels into ${OUT}/ (${num(stats.total)} contributions, peak ${stats.peak.count} on ${stats.peak.date})`);
