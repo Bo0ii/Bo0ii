@@ -373,7 +373,7 @@ function heroDesk(t, days, stats, now) {
   body += trace(t, days, stats, { x0: pad, x1: w - pad, top: 178, base: 262 });
   body += `<line x1="${pad}" y1="298.5" x2="${w - pad}" y2="298.5" stroke="${t.line}"/>`;
   body += statGrid(t, statItems(stats), { x0: pad, x1: w - pad, cols: 5, y: 324, rowH: 0, size: 19 });
-  return frame(w, 368, t, body);
+  return frame(w, 378, t, body);
 }
 
 function focusDesk(t) {
@@ -431,7 +431,7 @@ function heroPhone(t, days, stats, now) {
   body += trace(t, days, stats, { x0: pad, x1, top: 190, base: 262, monthEvery: 2 });
   body += `<line x1="${pad}" y1="298.5" x2="${x1}" y2="298.5" stroke="${t.line}"/>`;
   body += statGrid(t, statItems(stats), { x0: pad, x1, cols: 3, y: 324, rowH: 56, size: 18 });
-  return frame(w, 412, t, body);
+  return frame(w, 436, t, body);
 }
 
 function focusPhone(t) {
@@ -451,7 +451,7 @@ function focusPhone(t) {
 function stackPhone(t, icons) {
   const { w, pad } = PHONE;
   const { out, vars } = logos(t, icons, { x0: pad, x1: w - pad, y: 60, size: 24, perRow: Math.ceil(icons.length / 2), rowH: 40 });
-  return frame(w, 142, t, text(pad, 42, 'lbl', '', 'STACK') + out, { vars });
+  return frame(w, 152, t, text(pad, 42, 'lbl', '', 'STACK') + out, { vars });
 }
 
 function rhythmPhone(t, days) {
@@ -459,7 +459,7 @@ function rhythmPhone(t, days) {
   const { week, month } = rhythmData(days);
   let body = bars(t, { x0: pad, x1: w - pad, labelY: 42, base: 136, height: 64, items: week, highlight: -1, label: 'WEEKLY RHYTHM' });
   body += bars(t, { x0: pad, x1: w - pad, labelY: 196, base: 290, height: 64, items: month, highlight: month.length - 1, label: 'MONTHLY VOLUME' });
-  return frame(w, 332, t, body);
+  return frame(w, 342, t, body);
 }
 
 // ---------- main ----------
