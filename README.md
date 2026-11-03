@@ -1,92 +1,14 @@
-<!-- =============================== -->
-<!--          Bo0ii Profile          -->
-<!-- =============================== -->
+<!-- Panels are drawn by scripts/build.mjs and published to the `output` branch every night. -->
+
+<div align="center">
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/hero-dark.svg"><img alt="Amr Ahmed. Computer engineer and full-stack developer in the UAE. Daily GitHub contributions over the last 365 days." src="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/hero-light.svg" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/focus-dark.svg"><img alt="What I build: cross-platform desktop apps that feel native, web platforms in Next.js and React, ERP business systems, and interface design." src="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/focus-light.svg" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/stack-dark.svg"><img alt="Stack: Rust, TypeScript, JavaScript, React, Next.js, Electron, Tauri, Node.js, Flutter, C++, .NET, Python, Tailwind CSS, Supabase, PostgreSQL, SQLite, Redis, Stripe, Vercel, Cloudflare, Figma, Docker." src="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/stack-light.svg" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/rhythm-dark.svg"><img alt="Weekly rhythm and monthly volume of GitHub contributions over the last year." src="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/rhythm-light.svg" width="100%"></picture>
+</div>
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=28&pause=900&center=true&vCenter=true&width=980&lines=Amr+%7C+Computer+Engineer+%26+Full-Stack+Developer;Next.js+%7C+React+%7C+Vue+%7C+Modern+Product+Systems;ERP+Systems+%7C+Dashboards+%7C+Mobile+Apps;Clean+UI+%2B+Fast+Systems+%2B+Great+UX" alt="Typing SVG" />
-</p>
-
-<p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=185&color=0:0b1020,55:2ec4b6,100:ff9f1c&text=Hi%20I’m%20Amr%20&fontAlignY=35&fontSize=44&fontColor=ffffff&animation=twinkling" />
-</p>
-
-<p align="center">
-  <a href="https://github.com/Bo0ii">
-    <img src="https://img.shields.io/badge/GitHub-Bo0ii-0b1020?style=for-the-badge&logo=github&logoColor=white" />
-  </a>
-  <a href="https://www.linkedin.com/in/amr-ahmed-a78aa2249/">
-    <img src="https://img.shields.io/badge/LinkedIn-Amr%20Ahmed-2ec4b6?style=for-the-badge&logo=linkedin&logoColor=0b1020" />
-  </a>
-  <a href="mailto:amoroafg7881@hotmail.com">
-    <img src="https://img.shields.io/badge/Email-amoroafg7881%40hotmail.com-ff9f1c?style=for-the-badge&logo=gmail&logoColor=0b1020" />
-  </a>
-</p>
-
-<br/>
-
-## 👨‍💻 About Me
-I’m **Amr**, a **Computer Engineer** and **Full-Stack Developer** based in the **UAE**.  
-I build **websites**, **ERP systems**, and **mobile applications** — backed by **3+ years of graphic design** and **2+ years of full-stack development**.
-
-- 🧠 Focus: **scalable systems, clean UI, performance, strong UX**
-- 🏗️ I enjoy building: **dashboards, automations, templates, business workflows**
-- ⚡ I like “native-feel” experiences: smooth UI, fast response, clean structure
-
-<br/>
-
-## 🧰 Tech Stack
-### Frontend
-<p>
-  <img src="https://skillicons.dev/icons?i=js,ts,react,nextjs,vue,html,css,tailwind,vite" />
-</p>
-
-### Backend / Data
-<p>
-  <img src="https://skillicons.dev/icons?i=nodejs,express,mysql,postgres,supabase,graphql,redis" />
-</p>
-
-### Tools / Workflow
-<p>
-  <img src="https://skillicons.dev/icons?i=docker,vercel,git,github,githubactions,linux,figma,postman" />
-</p>
-
-<p>
-  <img src="https://img.shields.io/badge/Architecture-0b1020?style=for-the-badge&logo=buffer&logoColor=white" />
-  <img src="https://img.shields.io/badge/Performance-0b1020?style=for-the-badge&logo=googlechrome&logoColor=white" />
-  <img src="https://img.shields.io/badge/UI%2FUX%20Polish-0b1020?style=for-the-badge&logo=radix-ui&logoColor=white" />
-  <img src="https://img.shields.io/badge/Animations-0b1020?style=for-the-badge&logo=framer&logoColor=white" />
-</p>
-
-<br/>
-
-## 🚀 What I’m Building Now
-- 🏗️ Full **ERP systems** for companies (modules, dashboards, workflows)
-- 🔐 Auth / Roles / Permissions + secure data flows
-- 📲 Smooth **native-feel** web apps (PWA mindset + fast UI)
-
-<br/>
-
-## 🐍 Contribution Snake
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/github-contribution-grid-snake-dark.svg" />
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/github-contribution-grid-snake.svg" />
-    <img alt="github contribution snake" src="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/github-contribution-grid-snake-dark.svg" />
-  </picture>
-</p>
-
-<br/>
-
-## 🤝 Let’s Connect
-<p align="center">
-  <a href="https://www.linkedin.com/in/amr-ahmed-a78aa2249/">
-    <img src="https://img.shields.io/badge/LinkedIn-2ec4b6?style=for-the-badge&logo=linkedin&logoColor=0b1020" />
-  </a>
-  <a href="mailto:amoroafg7881@hotmail.com">
-    <img src="https://img.shields.io/badge/Email-ff9f1c?style=for-the-badge&logo=gmail&logoColor=0b1020" />
-  </a>
-</p>
-
-<p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=125&color=0:0b1020,55:ff3d81,100:ff9f1c&section=footer" />
+<a href="https://cursorhop.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/link-web-dark.svg"><img alt="cursorhop.com" src="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/link-web-light.svg" height="40"></picture></a>&nbsp;
+<a href="https://www.linkedin.com/in/amr-ahmed-a78aa2249/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/link-linkedin-dark.svg"><img alt="LinkedIn" src="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/link-linkedin-light.svg" height="40"></picture></a>&nbsp;
+<a href="mailto:amoorafg7881@hotmail.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/link-email-dark.svg"><img alt="Email" src="https://raw.githubusercontent.com/Bo0ii/Bo0ii/output/link-email-light.svg" height="40"></picture></a>
 </p>
